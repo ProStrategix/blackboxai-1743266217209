@@ -1,0 +1,14 @@
+MOST IMPORTANT:
+
+1. Apply patches in this order:
+   - error_handling
+   - cart_validation
+   - payment_processing
+
+2. Payment log goes AFTER:
+   const paymentResult = await processPayment(req.body);
+   
+3. BEFORE:
+   res.status(200).json({success: true});
+
+Test each patch before moving to next.
