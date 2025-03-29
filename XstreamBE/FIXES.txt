@@ -1,0 +1,25 @@
+THREE CHANGES:
+
+1. AUTH ERROR (data/authorized.js):
+catch(err) {
+    res.clearCookie('userSave');
+    return res.status(401).send({hasErrors: true, error: err.message});
+}
+
+2. CART CHECK (data/checkout.js):
+const validation = async (data, AccountId) => {
+    if (!data.data.some(i => i.type === 'internet')) throw {statusCode: 400, message: 'Internet required'};
+    if (!data.data.some(i => i.type === 'tv')) throw {statusCode: 400, message: 'TV required'};
+    return {validated: true};
+};
+
+3. PAYMENT LOG (routes/checkout.js):
+// Add after update.updated===true:
+await logTransaction({
+    accountId: CustomField1,
+    transactionId: TransactionID,
+    amount: Amount,
+    status: 'completed',
+    referenceId: ReferenceID,
+    authCode: AuthCode
+});
