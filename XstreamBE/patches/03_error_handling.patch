@@ -1,0 +1,53 @@
+# Error Handling Patch
+
+## 1. Create file: utils/errorHandler.js
+```javascript
+const handleAuthError = (err, res, isAPI = false) => {
+    res.clearCookie('userSave');
+    return isAPI 
+        ? res.status(err.statusCode || 400).json({
+            error: err.message || 'Authentication failed'
+          })
+        : res.redirect('/register');
+};
+
+const handleCartError = (err, res) => {
+    return res.status(err.statusCode || 400).json({
+        error: err.message || 'Cart operation failed'
+    });
+};
+
+const handlePaymentError = (err, res) => {
+    return res.status(err.statusCode || 400).json({
+        error: err.message || 'Payment processing failed'
+    });
+};
+
+module.exports = {
+    handleAuthError,
+    handleCartError,
+    handlePaymentError
+};
+```
+
+## 2. Update error handling in routes:
+
+In routes/auth.js catch blocks:
+```javascript
+const { handleAuthError } = require('../utils/errorHandler');
+// In catch blocks:
+return handleAuthError(err, res, true);
+```
+
+In routes/cart.js catch blocks:
+```javascript
+const { handleCartError } = require('../utils/errorHandler');
+// In catch blocks:
+return handleCartError(err, res);
+```
+
+In routes/checkout.js catch blocks:
+```javascript
+const { handlePaymentError } = require('../utils/errorHandler');
+// In catch blocks:
+return handlePaymentError(err, res);
