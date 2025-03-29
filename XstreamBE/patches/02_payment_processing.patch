@@ -1,0 +1,54 @@
+# Payment Processing Patch
+
+## 1. Create file: data/transactionLog.js
+```javascript
+const mongoCollections = require('../config/mongoCollections');
+const transactions = mongoCollections.transactions;
+
+const logTransaction = async (transactionData) => {
+    const transactionCollection = await transactions();
+    
+    const logEntry = {
+        accountId: transactionData.accountId,
+        transactionId: transactionData.transactionId,
+        amount: parseFloat(transactionData.amount),
+        status: transactionData.status,
+        timestamp: new Date(),
+        details: {
+            referenceId: transactionData.referenceId,
+            authCode: transactionData.authCode
+        }
+    };
+
+    const result = await transactionCollection.insertOne(logEntry);
+    if (!result.insertedId) {
+        throw {
+            statusCode: 500,
+            message: 'Failed to log transaction'
+        };
+    }
+
+    return result.insertedId;
+};
+
+module.exports = {
+    logTransaction
+};
+```
+
+## 2. Modify: routes/checkout.js
+Add at top:
+```javascript
+const { logTransaction } = require('../data/transactionLog');
+```
+
+Add to payment processing:
+```javascript
+await logTransaction({
+    accountId: req.user.AccountId,
+    transactionId: paymentResult.id,
+    amount: total,
+    status: 'completed',
+    referenceId: paymentResult.referenceId,
+    authCode: paymentResult.authCode
+});
