@@ -1,0 +1,22 @@
+In routes/checkout.js, find this block:
+
+router.route('/process').post(authorizeUser, async (req, res) => {
+    try {
+        // Process payment logic here
+        const paymentResult = await processPayment(req.body);
+        
+        // ADD THE TRANSACTION LOG HERE, right after payment processing
+        await logTransaction({
+            accountId: req.user.AccountId,
+            transactionId: paymentResult.id,
+            amount: total,
+            status: 'completed',
+            referenceId: paymentResult.referenceId,
+            authCode: paymentResult.authCode
+        });
+
+        // Continue with rest of function
+    } catch (e) {
+        return handlePaymentError(e, res);
+    }
+});
