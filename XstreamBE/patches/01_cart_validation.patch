@@ -1,0 +1,56 @@
+# Cart Validation Patch
+
+## 1. Create file: data/planValidation.js
+```javascript
+const validateCartPlans = async (items, accountId) => {
+    // Basic validation - must have internet and TV
+    const hasInternet = items.find(i => i.type === 'internet');
+    const hasTV = items.find(i => i.type === 'tv');
+
+    if (!hasInternet) {
+        return {
+            validated: false,
+            error: 'Internet plan required'
+        };
+    }
+
+    if (!hasTV) {
+        return {
+            validated: false,
+            error: 'TV plan required'
+        };
+    }
+
+    return {
+        validated: true
+    };
+};
+
+module.exports = {
+    validateCartPlans
+};
+```
+
+## 2. Modify: data/cart.js
+Add at top:
+```javascript
+const { validateCartPlans } = require('./planValidation');
+```
+
+Add before addToCart:
+```javascript
+const validateCart = async (itemId, AccountId) => {
+    const validation = await validateCartPlans([{itemId}], AccountId);
+    if (!validation.validated) {
+        throw {
+            statusCode: 400,
+            message: validation.error || 'Invalid plan combination'
+        };
+    }
+    return true;
+};
+```
+
+Add to start of addToCart:
+```javascript
+await validateCart(data.itemId, data.AccountId);
