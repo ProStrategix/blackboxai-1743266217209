@@ -1,0 +1,10 @@
+EXACT LOCATION:
+
+1. In routes/checkout.js
+2. Inside the '/process' POST route
+3. Inside the try block
+4. RIGHT AFTER the line:
+   const paymentResult = await processPayment(req.body);
+5. BEFORE any response is sent back
+
+The log must happen after payment success but before response.
